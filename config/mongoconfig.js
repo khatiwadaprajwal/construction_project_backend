@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const dbUrl = "mongodb+srv://prajwalkhatiwada28:Prajwal%4012345@construction.9uzzdh0.mongodb.net/";
-
+const dbUrl = "mongodb://127.0.0.1:27017/construction";
 mongoose.connect(dbUrl, {
     autoIndex: true,
     autoCreate: true

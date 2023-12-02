@@ -7,6 +7,10 @@ const PORT = process.env.PORT || 3000;
 // Express setup
 app.use(express.json());
 
+//routes connected
+const routes = require("./routes/index")
+app.use("/v1",routes)
+
 // Routes
 app.get('/', (req, res) => {
     res.send('Hello, World!');
