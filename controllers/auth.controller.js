@@ -39,21 +39,31 @@ const login = async (req, res) => {
     }
 
     
-    const token = jwt.sign(
+     // Generate access token with a 15-minute expiration time
+     const accessToken = jwt.sign(
       { userId: user.userId, name: user.full_name, email: user.email },
-      process.env.JWT_SECRET || 'prajwal'
+      process.env.JWT_SECRET || 'prajwal',
+      { expiresIn: '1m' }
     );
 
-    
+    // Generate refresh token with a 7-day expiration time
+    const refreshToken = jwt.sign(
+      { userId: user.userId, name: user.full_name, email: user.email },
+      process.env.JWT_SECRET || 'prajwal',
+      { expiresIn: '7d' }
+    );
+
     res.json({
       msg: 'You are logged in',
       user: { full_name: user.full_name, email: user.email },
-      token: token,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error during login' });
   }
+
 };
 
 module.exports = {
