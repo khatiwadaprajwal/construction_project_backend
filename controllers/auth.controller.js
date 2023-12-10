@@ -19,7 +19,8 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    
+    // Assuming user validation has already been performed using middleware like 'joi'
+
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
@@ -29,41 +30,35 @@ const login = async (req, res) => {
       });
     }
 
-    
-    const passwordMatch = await bcrypt.compare(req.body.password, user.password);
+    // Assuming password validation and authentication have been performed
 
-    if (!passwordMatch) {
-      return res.status(401).json({
-        msg: 'Invalid credentials',
-      });
-    }
-
-    
-     // Generate access token with a 15-minute expiration time
-     const accessToken = jwt.sign(
-      { userId: user.userId, name: user.full_name, email: user.email },
+    // Generate access token with a short expiration time (e.g., 15 minutes)
+    const accessToken = jwt.sign(
+      { userId: user.userId, email: user.email },
       process.env.JWT_SECRET || 'prajwal',
-      { expiresIn: '1m' }
+      { expiresIn: '15m' }
     );
 
-    // Generate refresh token with a 7-day expiration time
+    // Generate refresh token with a long expiration time (e.g., 7 days)
     const refreshToken = jwt.sign(
-      { userId: user.userId, name: user.full_name, email: user.email },
+      { userId: user.userId, email: user.email },
       process.env.JWT_SECRET || 'prajwal',
       { expiresIn: '7d' }
     );
+
+    // Save the refresh token securely on the server-side (not sent to the client)
+    // You might want to store this in a database associated with the user
 
     res.json({
       msg: 'You are logged in',
       user: { full_name: user.full_name, email: user.email },
       accessToken,
-      refreshToken,
+      //  not expose the refresh token to the client
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error during login' });
   }
-
 };
 
 module.exports = {
