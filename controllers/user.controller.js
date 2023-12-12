@@ -2,7 +2,7 @@ const User = require('../models/user.model');
 
 const getAllUsers = async (req, res) => {
   try {
-    const nonAdminUsers = await User.find({ isAdmin: false });
+    const nonAdminUsers = await User.find({ isadmin: false });
     res.status(200).json({ user: nonAdminUsers });
   } catch (error) {
     console.error('Error fetching users:', error.message);
@@ -10,21 +10,35 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+
 const getUserById = async (req, res) => {
-  const userId = req.params.id;
+  const id = req.params.id;
+
   try {
-    const user = await User.findOne({ _id: userId, isAdmin: false });
-    res.status(200).json({ user: user });
+    console.log(id);
+
+    // Construct a filter object with the user ID
+    const userone = await User.findOne({ userId: id });
+
+
+    if (!userone) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json({ user: userone });
   } catch (error) {
     console.error('Error finding non-admin user by ID:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
+
+
+
 const deleteUserById = async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params.userId.toString();
   try {
-    const result = await User.deleteOne({ _id: userId });
+    const result = await User.deleteOne({ userId: userId });
 
     if (result.deletedCount === 1) {
       res.status(200).json({ message: 'User deleted successfully.' });
@@ -37,16 +51,18 @@ const deleteUserById = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params.Id;
   const updatedUserData = req.body;
+  
 
   try {
-    const result = await User.updateOne({ _id: userId }, { $set: updatedUserData });
+    const result = await User.findOneAndUpdate({ userId: userId }, { $set: updatedUserData }, { new: true });
+    console.log(result);
 
-    if (result.nModified === 1) {
-      res.status(200).json({ message: 'User updated successfully.' });
+    if (result) {
+      res.status(200).json({ message: 'User updated successfully.', user: result });
     } else {
-      res.status(404).json({ message: 'User not found or data not modified.' });
+      res.status(404).json({ message: 'User not found.' });
     }
   } catch (error) {
     console.error('Error updating user by ID:', error.message);

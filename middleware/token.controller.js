@@ -51,7 +51,7 @@ const regenerateAccessToken = async (req, res, next) => {
     const newAccessToken = jwt.sign(
       { userId: user.userId, name: user.full_name, email: user.email },
       process.env.JWT_SECRET || 'prajwal',
-      { expiresIn: '1m' }
+      { expiresIn: '15m' }
     );
 
     // Attach the new access token to the request

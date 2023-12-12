@@ -10,12 +10,12 @@ const parser = body_parser.json();
 
 router.route("/user/getAllUsers")
     .get(isLoggedIn,isAdmin,getAllUsers)
-router.route("/user/updateuser/:userId")
-    .put(parser,isLoggedIn,isAdmin,updateUserById)
-router.route("/user/getuser/:userId")
+router.route("/user/updateuser/:Id")
+    .put(parser,updateUserById)
+router.route("/user/getuser/:id")
    .get(getUserById)
-   router.route("/user/getuser/:userId")
-   .delete(isLoggedIn,isAdmin,deleteUserById)
+router.route("/user/deleteuser/:userId")
+   .delete(deleteUserById)
 
     
 
