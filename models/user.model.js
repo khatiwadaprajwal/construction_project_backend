@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
         },
     ],
 });
-
+userSchema.set('primary_key', 'userId');
 const UserData = mongoose.model('UserData', userSchema);
 
 module.exports = UserData;
