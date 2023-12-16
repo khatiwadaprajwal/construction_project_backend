@@ -8,6 +8,8 @@ const parser = body_parser.json();
 
 router.route("/project/addexpense") 
   .post(parser, addExpense);
+router.route("/project/getallexpenses")
+  .get(getAllExpenses);
 
 module.exports = router;
 

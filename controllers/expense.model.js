@@ -13,12 +13,22 @@ const addExpense = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
+const getAllExpenses = async (req, res) => {
+    try {
+      const expenses = await Expense.find();
+      res.status(200).json({ expenses });
+    } catch (error) {
+      console.error('Error fetching expenses:', error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+  
 
 
 
 
 module.exports = {
+    getAllExpenses,
 
   addExpense,
  
