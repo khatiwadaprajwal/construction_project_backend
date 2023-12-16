@@ -4,9 +4,9 @@ const { v4: uuidv4 } = require('uuid'); // Import uuidv4
 
 const userSchema = new mongoose.Schema({
     userId: {
-      type: String,
-      default: uuidv4,
-      unique: true,
+        type: String,
+        default: uuidv4,
+        unique: true,
     },
     full_name: {
         type: String,
@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     },
     phno: {
         type: String,
-        required:true
+        required: true
     },
     password: {
         type: String,
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
     },
     isadmin: {
         type: Boolean,
-        default: false, 
+        default: false,
         // Adjust the type based on your actual Role definition
     },
     projects: [
@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
         },
     ],
 });
-userSchema.set('primary_key', 'userId');
+
 const UserData = mongoose.model('UserData', userSchema);
 
 module.exports = UserData;
