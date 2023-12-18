@@ -37,10 +37,10 @@ const projectSchema = new mongoose.Schema({
     ref: 'UserData',
     required: [true, 'User ID is required'],
   },
-  invoices: [
+  miscexpenses: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Invoice',
+      ref: 'MiscExpense',
     },
   ],
   expenses: [
