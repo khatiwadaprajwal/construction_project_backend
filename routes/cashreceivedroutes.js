@@ -4,6 +4,7 @@ const { getAllReceivedRecords, getReceivedRecordById, createNewReceivedRecord, u
 const bodyParser = require('body-parser');
 const parser = bodyParser.json();
 
+
 router.route("/project/getallcashreceivedrecords")
     .get(getAllReceivedRecords);
 router.route("/project/createcashreceivedrecord")
@@ -14,5 +15,7 @@ router.route("/project/updatecashreceivedrecord/:cashid")
     .put(parser, updateReceivedRecord);
 router.route("/project/deletecashreceivedrecord/:cashid")
     .delete(deleteReceivedRecord);
+
+
 
 module.exports = router;

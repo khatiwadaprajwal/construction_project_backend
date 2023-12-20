@@ -36,37 +36,26 @@ const projectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserData',
     required: [true, 'User ID is required'],
-  },
-  miscexpenses: [
+},
+miscexpenses: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'MiscExpense',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MiscExpense',
     },
-  ],
-  expenses: [
+],
+expenses: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Expense',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Expense',
     },
-  ],
-  cashReceived: [
+],
+cashReceived: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'CashReceived',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CashReceived',
     },
-  ],
-  suppliers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Supplier',
-    },
-  ],
-  clientFeedback: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'ClientFeedback',
-    },
-  ],
+],
+ 
 });
 
 

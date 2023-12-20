@@ -33,19 +33,13 @@ const userSchema = new mongoose.Schema({
     projects: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Project',
+            ref: 'ProjectData',
         },
     ],
     salaries: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Salary',
-        },
-    ],
-    clientFeedback: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'ClientFeedback',
         },
     ],
 });

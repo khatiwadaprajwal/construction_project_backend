@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 
+
 const getAllUsers = async (req, res) => {
   try {
     const nonAdminUsers = await User.find({ isadmin: false });

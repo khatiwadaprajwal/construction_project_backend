@@ -4,6 +4,7 @@ const User = require('../models/user.model');
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
+
 const register = async (req, res) => {
   try {
     const newUser = await User.create(req.body);

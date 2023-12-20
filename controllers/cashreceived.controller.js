@@ -1,4 +1,5 @@
 const CashReceived = require('../models/cashreceived.model')
+const ProjectData = require('../models/project.model')
 const getAllReceivedRecords = async (req, res) => {
   try {
     const receivedRecords = await CashReceived.find();
@@ -26,36 +27,69 @@ const getReceivedRecordById = async (req, res) => {
   }
 };
 
+
 const createNewReceivedRecord = async (req, res) => {
-  const receivedRecordData = req.body;
+  const cashReceivedData = req.body;
 
   try {
-    console.log(receivedRecordData);
-    const newReceivedRecord = await CashReceived.create(receivedRecordData);
-    res.status(201).json({ message: 'Cash received record created successfully.', receivedRecord: newReceivedRecord });
+    const newCashReceived = await CashReceived.create(cashReceivedData);
+
+    // Update the project with the new CashReceived ID
+    const updatedProject = await ProjectData.findOneAndUpdate(
+      { _id: cashReceivedData.pid },
+      { $push: { cashReceived: newCashReceived._id } },
+      { new: true }
+    );
+
+    if (!updatedProject) {
+      // If the project is not found, handle accordingly
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.status(201).json({ message: 'CashReceived added successfully.', cashReceived: newCashReceived });
   } catch (error) {
-    console.error('Error creating cash received record:', error.message);
+    console.error('Error adding CashReceived:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 const updateReceivedRecord = async (req, res) => {
   const cashid = req.params.cashid;
-  const updatedReceivedRecordData = req.body;
-
   try {
-    const result = await CashReceived.findOneAndUpdate({ cashId: cashId }, { $set: updatedReceivedRecordData }, { new: true });
+    const updatedCashReceivedData = req.body;
 
-    if (result) {
-      res.status(200).json({ message: 'Cash received record updated successfully.', receivedRecord: result });
-    } else {
-      res.status(404).json({ message: 'Cash received record not found.' });
+    // Find the existing cash received record
+    const existingCashReceived = await CashReceived.findOne({ cashId: cashid });
+
+    if (!existingCashReceived) {
+      return res.status(404).json({ message: 'CashReceived record not found.' });
     }
+
+    // Update the cash received record
+    const updatedCashReceived = await CashReceived.findOneAndUpdate(
+      { cashId: cashid },
+      { $set: updatedCashReceivedData },
+      { new: true }
+    );
+
+    // Update the ProjectData model with the new CashReceived ID
+    const updatedProject = await ProjectData.findOneAndUpdate(
+      { 'cashReceived': cashid },
+      { $set: { 'cashReceived.$': updatedCashReceived._id } },
+      { new: true }
+    );
+
+    if (!updatedProject) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    res.status(200).json({ message: 'CashReceived updated successfully.', cashReceived: updatedCashReceived });
   } catch (error) {
-    console.error('Error updating cash received record by ID:', error.message);
+    console.error('Error updating CashReceived by ID:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 const deleteReceivedRecord = async (req, res) => {
   const cashid = req.params.cashid;
