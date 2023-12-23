@@ -1,77 +1,33 @@
 const MiscExpense = require('../models/misc.model');
 const ProjectData = require('../models/project.model');
 
-const updateMiscExpense = async (req, res) => {
-  const miscId = req.params.miscId;
+const getAllMiscExpenses = async (req, res) => {
   try {
-    console.log('Update Data:', req.body);
-
-    const updatedMiscExpenseData = req.body;
-
-    // Find the existing miscellaneous expense record
-    const existingMiscExpense = await MiscExpense.findOne({ misid: miscId });
-
-    if (!existingMiscExpense) {
-      return res.status(404).json({ message: 'Miscellaneous expense not found.' });
-    }
-
-    // Update the miscellaneous expense record
-    const updatedMiscExpense = await MiscExpense.findOneAndUpdate(
-      { misid: miscId },
-      { $set: updatedMiscExpenseData },
-      { new: true }
-    ).lean();
-
-    console.log('Result Object:', updatedMiscExpense);
-
-    // Find the project that references the old misc expense ID and update it
-    const updatedProject = await ProjectData.findOneAndUpdate(
-      { 'miscexpenses': existingMiscExpense._id },
-      { $set: { 'miscexpenses.$': updatedMiscExpense._id } },
-      { new: true }
-    ).lean();
-
-    if (!updatedProject) {
-      return res.status(404).json({ message: 'Project not found.' });
-    }
-
-    res.status(200).json({ message: 'Miscellaneous expense updated successfully.', miscExpense: updatedMiscExpense });
+    const miscExpenses = await MiscExpense.find();
+    res.status(200).json({ miscExpenses });
   } catch (error) {
-    console.error('Error updating Miscellaneous expense by ID:', error.message);
+    console.error('Error fetching miscellaneous expenses:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-
-
-
-const deleteMiscExpense = async (req, res) => {
+const getMiscExpenseById = async (req, res) => {
   const miscId = req.params.miscId;
 
   try {
-    // Delete the miscellaneous expense record
-    const result = await MiscExpense.deleteOne({ misid: miscId });
+    const miscExpense = await MiscExpense.findOne({ misid: miscId });
 
-    if (result.deletedCount === 1) {
-      // Update the ProjectData model by pulling the MiscExpense ID from the array
-      const updatedProject = await ProjectData.findOneAndUpdate(
-        { 'miscexpenses': miscId },
-        { $pull: { 'miscexpenses': miscId } },
-        { new: true }
-      );
-
-      if (!updatedProject) {
-        return res.status(404).json({ message: 'Project not found.' });
-      }
-
-      res.status(200).json({ message: 'Miscellaneous expense deleted successfully.' });
-    } else {
-      res.status(404).json({ message: 'Miscellaneous expense not found or could not be deleted.' });
+    if (!miscExpense) {
+      return res.status(404).json({ error: 'Miscellaneous expense not found' });
     }
+
+    res.status(200).json({ miscExpense });
   } catch (error) {
-    res.status(500).json({ error: 'Error deleting miscellaneous expense by ID:', message: error.message });
+    console.error('Error finding miscellaneous expense by ID:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 const addMiscExpense = async (req, res) => {
   const miscExpenseData = req.body;
 
@@ -96,37 +52,68 @@ const addMiscExpense = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-const getMiscExpenseById = async (req, res) => {
+
+const updateMiscExpense = async (req, res) => {
   const miscId = req.params.miscId;
 
   try {
-    const miscExpense = await MiscExpense.findOne({ misid: miscId });
+    const updatedMiscExpenseData = req.body;
 
-    if (!miscExpense) {
-      return res.status(404).json({ error: 'Miscellaneous expense not found' });
+    // Find the existing miscellaneous expense record
+    const existingMiscExpense = await MiscExpense.findOne({ misid: miscId });
+
+    if (!existingMiscExpense) {
+      return res.status(404).json({ message: 'Miscellaneous expense not found.' });
     }
 
-    res.status(200).json({ miscExpense });
+    // Update the miscellaneous expense record
+    const updatedMiscExpense = await MiscExpense.findOneAndUpdate(
+      { misid: miscId },
+      { $set: updatedMiscExpenseData },
+      { new: true }
+    );
+
+    res.status(200).json({ message: 'Miscellaneous expense updated successfully.', miscExpense: updatedMiscExpense });
   } catch (error) {
-    console.error('Error finding miscellaneous expense by ID:', error.message);
+    console.error('Error updating Miscellaneous expense by ID:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-const getAllMiscExpenses = async (req, res) => {
+const deleteMiscExpense = async (req, res) => {
+  const miscId = req.params.miscId;
+
   try {
-    const miscExpenses = await MiscExpense.find();
-    res.status(200).json({ miscExpenses });
+    // Delete the miscellaneous expense record
+    const result = await MiscExpense.findOneAndDelete({ misid: miscId });
+
+    if (result) {
+      // Update the ProjectData model by pulling the MiscExpense ID from the array
+      const updatedProject = await ProjectData.findOneAndUpdate(
+        { miscexpenses: result._id },
+        { $pull: { miscexpenses: result._id } },
+        { new: true }
+      );
+
+      if (updatedProject) {
+        res.status(200).json({ message: 'Miscellaneous expense deleted successfully.' });
+      } else {
+        res.status(404).json({ message: 'Project not found or miscellaneous expense already deleted.' });
+      }
+    } else {
+      res.status(404).json({ message: 'Miscellaneous expense not found or could not be deleted.' });
+    }
   } catch (error) {
-    console.error('Error fetching miscellaneous expenses:', error.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Error deleting miscellaneous expense by ID:', message: error.message });
   }
 };
+
 
 module.exports = {
-  addMiscExpense,
-  getMiscExpenseById,
   getAllMiscExpenses,
+  getMiscExpenseById,
+  addMiscExpense,
   updateMiscExpense,
   deleteMiscExpense,
 };
+

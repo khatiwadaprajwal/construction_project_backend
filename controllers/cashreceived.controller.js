@@ -1,5 +1,6 @@
-const CashReceived = require('../models/cashreceived.model')
-const ProjectData = require('../models/project.model')
+const CashReceived = require('../models/cashreceived.model');
+const ProjectData = require('../models/project.model');
+
 const getAllReceivedRecords = async (req, res) => {
   try {
     const receivedRecords = await CashReceived.find();
@@ -26,7 +27,6 @@ const getReceivedRecordById = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 const createNewReceivedRecord = async (req, res) => {
   const cashReceivedData = req.body;
@@ -72,17 +72,6 @@ const updateReceivedRecord = async (req, res) => {
       { new: true }
     );
 
-    // Update the ProjectData model with the new CashReceived ID
-    const updatedProject = await ProjectData.findOneAndUpdate(
-      { 'cashReceived': cashid },
-      { $set: { 'cashReceived.$': updatedCashReceived._id } },
-      { new: true }
-    );
-
-    if (!updatedProject) {
-      return res.status(404).json({ message: 'Project not found.' });
-    }
-
     res.status(200).json({ message: 'CashReceived updated successfully.', cashReceived: updatedCashReceived });
   } catch (error) {
     console.error('Error updating CashReceived by ID:', error.message);
@@ -90,15 +79,26 @@ const updateReceivedRecord = async (req, res) => {
   }
 };
 
-
 const deleteReceivedRecord = async (req, res) => {
   const cashid = req.params.cashid;
 
   try {
-    const result = await CashReceived.deleteOne({ cashId: cashid });
+    // Delete the cash received record
+    const result = await CashReceived.findOneAndDelete({ cashId: cashid });
 
-    if (result.deletedCount === 1) {
-      res.status(200).json({ message: 'Cash received record deleted successfully.' });
+    if (result) {
+      // Update the ProjectData model by pulling the CashReceived ID from the array
+      const updatedProject = await ProjectData.findOneAndUpdate(
+        { cashReceived: result._id },
+        { $pull: { cashReceived: result._id } },
+        { new: true }
+      );
+
+      if (updatedProject) {
+        res.status(200).json({ message: 'Cash received record deleted successfully.' });
+      } else {
+        res.status(404).json({ message: 'Project not found or cash received record already deleted.' });
+      }
     } else {
       res.status(404).json({ message: 'Cash received record not found or could not be deleted.' });
     }
@@ -106,6 +106,7 @@ const deleteReceivedRecord = async (req, res) => {
     res.status(500).json({ error: 'Error deleting cash received record by ID:', message: error.message });
   }
 };
+
 
 module.exports = {
   getAllReceivedRecords,

@@ -1,5 +1,6 @@
-
 const Expense = require('../models/expenses.model');
+const ProjectData = require('../models/project.model');
+
 const getAllExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find();
@@ -31,8 +32,20 @@ const addExpense = async (req, res) => {
   const expenseData = req.body;
 
   try {
-    console.log(expenseData); 
     const newExpense = await Expense.create(expenseData);
+
+    // Update the project with the new Expense ID
+    const updatedProject = await ProjectData.findOneAndUpdate(
+      { _id: expenseData.pid },
+      { $push: { expenses: newExpense._id } },
+      { new: true }
+    );
+
+    if (!updatedProject) {
+      // If the project is not found, handle accordingly
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
     res.status(201).json({ message: 'Expense created successfully.', expense: newExpense });
   } catch (error) {
     console.error('Error creating expense:', error.message);
@@ -62,10 +75,21 @@ const deleteExpenseById = async (req, res) => {
   const dId = req.params.dId;
 
   try {
-    const result = await Expense.deleteOne({ expid: dId });
+    const result = await Expense.findOneAndDelete({ expid: dId });
 
-    if (result.deletedCount === 1) {
-      res.status(200).json({ message: 'Expense deleted successfully.' });
+    if (result) {
+      // Update the ProjectData model by pulling the Expense ID from the array
+      const updatedProject = await ProjectData.findOneAndUpdate(
+        { expenses: result._id },
+        { $pull: { expenses: result._id } },
+        { new: true }
+      );
+
+      if (updatedProject) {
+        res.status(200).json({ message: 'Expense deleted successfully.' });
+      } else {
+        res.status(404).json({ message: 'Project not found or expense already deleted.' });
+      }
     } else {
       res.status(404).json({ message: 'Expense not found or could not be deleted.' });
     }
